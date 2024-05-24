@@ -10,6 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.incognia.EventProperties;
+import com.incognia.Incognia;
+import com.incognia.IncogniaTrial;
 import com.incognia.login.database.Database;
 
 import java.util.UUID;
@@ -31,6 +34,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             public void onClick(final View v) {
                 Database.logout(getApplicationContext());
                 Intent goToNextActivity = new Intent(getApplicationContext(), MainActivity.class);
+                Incognia.clearAccountId();
                 startActivity(goToNextActivity);
             }
         });
@@ -43,6 +47,15 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private void doTransaction() {
         UUID uuid = UUID.randomUUID();
         String transactionId = uuid.toString();
+
+        EventProperties properties = EventProperties.newProperties();
+
+        properties.put("id", transactionId);
+        properties.put("amount", 500);
+        IncogniaTrial.trackPaymentSent(transactionId, properties);
+
+
+
         String msg = "Transaction " + transactionId.substring(0, 5) + " successful!";
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
     }

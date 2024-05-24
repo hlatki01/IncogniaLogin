@@ -11,11 +11,17 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.incognia.Incognia;
+import com.incognia.IncogniaTrial;
 import com.incognia.login.database.Database;
+import com.incognia.login.utility.RandomString;
 import com.sirvar.robin.RobinActivity;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 public class MainActivity extends RobinActivity {
@@ -42,6 +48,15 @@ public class MainActivity extends RobinActivity {
     protected void onLogin(final String email, final String password) {
         if(Database.login(getApplicationContext(), email, password)){
             Intent goToNextActivity = new Intent(getApplicationContext(), HomeActivity.class);
+
+            String user = Database.getLoggedUser(getApplicationContext());
+            String hashedEmail = com.incognia.login.HashUtility.hashEmail(user);
+            Incognia.setAccountId(hashedEmail);
+
+            String loginId = RandomString.generateRandomHash(10);
+            IncogniaTrial.trackLoginSucceeded(hashedEmail, loginId);
+
+
             startActivity(goToNextActivity);
         }else{
             Toast.makeText(getApplicationContext(), "Wrong email/password", Toast.LENGTH_LONG).show();
@@ -58,6 +73,8 @@ public class MainActivity extends RobinActivity {
             else{
                 Database.addUser(getApplicationContext(), email, password);
                 Toast.makeText(getApplicationContext(), "User created successfully", Toast.LENGTH_LONG).show();
+                String hashedEmail = com.incognia.login.HashUtility.hashEmail(email);
+                IncogniaTrial.trackSignupSent(hashedEmail);
                 startLoginFragment();
             }
         }

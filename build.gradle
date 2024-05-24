@@ -14,6 +14,7 @@ buildscript {
 
 allprojects {
     repositories {
+        maven { url "https://repo.incognia.com/android/" }
         google()
         jcenter()
     }
